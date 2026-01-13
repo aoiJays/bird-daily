@@ -51,12 +51,7 @@ def run_scraper():
         # 简单的抓取测试：尝试获取页面上的导航栏文本或某个元素
         # 注意：Zhihu 的 class name 经常变动，这里我们抓取 title 或 h1 这种通用标签
         print("页面内容片段 (前500字符):")
-        print(driver.page_source[:2000])
-
-        if "知乎" in title:
-            print("✅ 成功访问知乎！")
-        else:
-            print("⚠️ 访问可能受限或遭遇验证码。")
+        print(driver.page_source)
 
     except Exception as e:
         print(f"❌ 发生错误: {e}")
