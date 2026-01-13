@@ -36,7 +36,7 @@ def run_scraper():
         driver = setup_driver()
         
         # 访问知乎的一个具体问题页面（比首页更容易访问，首页往往强制登录）
-        url = "https://www.zhihu.com/people/xule.null/posts" 
+        url = "https://space.bilibili.com/285286947" 
         print(f"正在访问: {url}")
         
         driver.get(url)
@@ -51,7 +51,7 @@ def run_scraper():
         # 简单的抓取测试：尝试获取页面上的导航栏文本或某个元素
         # 注意：Zhihu 的 class name 经常变动，这里我们抓取 title 或 h1 这种通用标签
         print("页面内容片段 (前500字符):")
-        print(driver.page_source[:500])
+        print(driver.page_source[:2000])
 
         if "知乎" in title:
             print("✅ 成功访问知乎！")
