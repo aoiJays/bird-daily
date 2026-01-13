@@ -21,7 +21,7 @@ jobs:
            python-version: '3.10'
       
       - name: 'Install requirements'
-        run: pip install -r ./Spider/requirements. txt
+        run: pip install -r ./Spider/requirements.txt
       
       - name:  'Working'
         run: python ./Spider/test.py
