@@ -1,4 +1,6 @@
-import html2text
+import time
+import json
+import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
@@ -9,7 +11,6 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def setup_driver():
     chrome_options = Options()
-    # 必须保留的无头模式配置，否则无法在 Action 中运行
     chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
@@ -24,59 +25,63 @@ def setup_driver():
 
 def run_scraper():
     driver = None
-    target_url = "https://www.zhihu.com/people/xule.null/posts"
-    search_keyword = "AI早报"
+    data_list = []
     
     try:
+        print("🚀 启动爬虫...")
         driver = setup_driver()
         
-        # 1. 访问列表页
-        driver.get(target_url)
+        url = "https://www.zhihu.com/explore"
+        driver.get(url)
+        
+        # 显式等待：直到页面中至少出现一个内容标题（最多等15秒）
+        # Zhihu 的标题 class 通常包含 'ContentItem-title'
+        print("⏳ 等待页面加载...")
         wait = WebDriverWait(driver, 15)
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, "ContentItem-title")))
         
-        # 2. 查找符合条件的文章链接
-        articles = driver.find_elements(By.CLASS_NAME, "ContentItem-title")
-        target_link = None
-        target_title = None
+        # 模拟滚动，触发懒加载（如果需要更多数据，可以多滚动几次）
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(3) 
 
-        for article in articles:
+        # 查找所有标题元素
+        # 注意：知乎的前端代码经常变，如果这里抓不到，可能需要更新 Selector
+        elements = driver.find_elements(By.CLASS_NAME, "ContentItem-title")
+        
+        print(f"✅ 找到 {len(elements)} 个内容标题。")
+        
+        for index, elem in enumerate(elements, 1):
             try:
-                link_elem = article.find_element(By.TAG_NAME, "a")
+                # 尝试获取标题内的链接，如果没有链接则获取文本
+                link_elem = elem.find_element(By.TAG_NAME, "a")
                 title = link_elem.text
-                if search_keyword in title:
-                    target_title = title
-                    target_link = link_elem.get_attribute("href")
-                    break # 找到最新的第一篇就退出循环
+                link = link_elem.get_attribute("href")
             except:
-                continue
-
-        if not target_link:
-            print("未找到包含 'AI早报' 的文章")
-            return
-
-        # 3. 进入详情页
-        driver.get(target_link)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "Post-RichText")))
-        
-        content_element = driver.find_element(By.CLASS_NAME, "Post-RichText")
-        content_html = content_element.get_attribute("innerHTML")
-
-        # 4. 转换为 Markdown
-        converter = html2text.HTML2Text()
-        converter.ignore_links = False
-        converter.body_width = 0
-        markdown_content = converter.handle(content_html)
-        
-        # 5. 直接输出字符串 (按照你的要求)
-        final_output = f"# {target_title}\n\nOriginal URL: {target_link}\n\n---\n\n{markdown_content}"
-        print(final_output)
+                # 备用方案
+                title = elem.text
+                link = "N/A"
+            
+            print(f"{index}. {title}")
+            data_list.append({"title": title, "link": link})
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ 发生错误: {e}")
+        # 出错时保存截图，方便调试
+        if driver:
+            driver.save_screenshot("error_screenshot.png")
+            
     finally:
         if driver:
             driver.quit()
+
+    # --- 保存数据到文件 ---
+    if data_list:
+        # 保存为 JSON
+        with open('zhihu_data.json', 'w', encoding='utf-8') as f:
+            json.dump(data_list, f, ensure_ascii=False, indent=4)
+        print("💾 数据已保存到 zhihu_data.json")
+    else:
+        print("⚠️ 未抓取到有效数据。")
 
 if __name__ == "__main__":
     run_scraper()
