@@ -42,7 +42,7 @@ def run_scraper():
         driver.get(url)
         
         # 等待页面加载
-        time.sleep(5)
+        time.sleep(10)
         
         # 获取并打印页面标题
         title = driver.title
