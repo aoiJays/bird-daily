@@ -36,7 +36,7 @@ def run_scraper():
         driver = setup_driver()
         
         # 访问知乎的一个具体问题页面（比首页更容易访问，首页往往强制登录）
-        url = "https://space.bilibili.com/285286947" 
+        url = "https://space.bilibili.com/285286947/upload/video" 
         print(f"正在访问: {url}")
         
         driver.get(url)
