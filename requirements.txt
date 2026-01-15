@@ -1,3 +1,5 @@
 selenium
 webdriver-manager
 html2text
+yt_dlp
+tqdm

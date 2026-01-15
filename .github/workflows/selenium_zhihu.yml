@@ -1,4 +1,4 @@
-name: Run Selenium on Zhihu
+name: Run Selenium
 
 # 触发条件：当你 push 代码或者手动点击 Run workflow 时触发
 on:

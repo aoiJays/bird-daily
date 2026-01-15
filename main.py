@@ -1,64 +1,46 @@
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
+from config import *
+from bilibili import *
 
-def setup_driver():
-    chrome_options = Options()
-    
-    # --- GitHub Action 核心配置 ---
-    # 无头模式：因为服务器没有显示器，必须开启
-    chrome_options.add_argument("--headless=new") 
-    # 解决 Linux 容器中的权限和内存问题
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    
-    # --- 反爬虫伪装配置 ---
-    # 设置窗口大小，防止因视窗过小被检测
-    chrome_options.add_argument("--window-size=1920,1080")
-    # 伪装 User-Agent，假装是正常的 Windows 电脑
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-    # 禁用自动化标志（关键：防止被识别为 Robot）
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-
-    # 使用 webdriver_manager 自动安装并启动对应版本的驱动
-    service = ChromeService(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    return driver
-
-def run_scraper():
-    driver = None
-    try:
-        print("启动 Chrome 浏览器...")
-        driver = setup_driver()
-        
-        # 访问知乎的一个具体问题页面（比首页更容易访问，首页往往强制登录）
-        url = "https://space.bilibili.com/285286947/upload/video" 
-        print(f"正在访问: {url}")
-        
-        driver.get(url)
-        
-        # 等待页面加载
-        time.sleep(10)
-        
-        # 获取并打印页面标题
-        title = driver.title
-        print(f"页面标题: {title}")
-        
-        # 简单的抓取测试：尝试获取页面上的导航栏文本或某个元素
-        # 注意：Zhihu 的 class name 经常变动，这里我们抓取 title 或 h1 这种通用标签
-        print("页面内容片段 (前500字符):")
-        print(driver.page_source)
-
-    except Exception as e:
-        print(f"❌ 发生错误: {e}")
-    finally:
-        if driver:
-            driver.quit()
-            print("浏览器已关闭。")
+from tqdm import tqdm
+import os
 
 if __name__ == "__main__":
-    run_scraper()
+
+    for video in tqdm(BILIBILI_TASK):
+        print(f"开始处理视频: {video}")
+        try:
+
+            video_list = get_up_video_list(video['BILIBILI_UP_ID'])
+
+            for video_info in video_list:
+                
+                video_title = video_info['title']
+                video_url = video_info['link']
+                video_date = video_info['date']
+
+                # 过滤不符合关键字的标题
+                if video['KEY_WORD'] not in video_title:
+                    continue
+                
+                # 只下载24h以内的视频
+                if '小时' not in video_date:
+                    continue
+                
+                output_path = os.path.join(BILIBILI_VIDEO_PATH, video['CATEGORY'], str(video['BILIBILI_UP_ID']))
+                download_bilibili_audio(video_url, output_path, filename=video_title, audio_format='mp3')
+                download_danmu(video_url, output_dir=output_path, filename=video_title)
+        except Exception as e:
+            print(f"处理视频 {video} 时发生错误: {e}")
+            continue
+        finally:
+            pass
+
+    print("所有B站音频下载任务完成！")
+    time.sleep(15)
+    # 删除output目录下的临时文件
+    import shutil
+    temp_path = 'output'
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
+
+    print("文件已清理！")
