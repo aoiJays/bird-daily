@@ -54,6 +54,7 @@ def download_danmu(video_url, output_dir="danmaku_downloads", filename=None):
 
     # 配置 yt-dlp 选项
     ydl_opts = {
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'skip_download': True,       # 关键：跳过视频下载，只下元数据和字幕
         'writesubtitles': True,      # 开启字幕下载
         'writeautomaticsub': True,   # B站弹幕有时被视为自动生成的字幕
