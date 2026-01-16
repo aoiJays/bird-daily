@@ -18,6 +18,7 @@ def download_bilibili_audio(url, output_path='.', filename=None, audio_format='m
 
     ydl_opts = {
         'format': 'bestaudio/best',
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'outtmpl': outtmpl,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio', # 使用 FFmpeg 提取音频
