@@ -24,10 +24,10 @@ def get_up_video_list(up_id: int, max_retries=5):
             print("[get_up_video_list]正在加载页面...")
             driver.get(url)
 
-            time.sleep(1)  
-            driver.execute_script("window.scrollBy(0, 500);")
-            time.sleep(1)
-            driver.execute_script("window.scrollBy(0, -500);")
+            # time.sleep(1)  
+            # driver.execute_script("window.scrollBy(0, 500);")
+            # time.sleep(1)
+            # driver.execute_script("window.scrollBy(0, -500);")
             # 【关键修改】使用显式等待 (Explicit Wait)
             # 等待直到 'bili-video-card__title' 元素出现，最多等 10 秒
             # 这比 time.sleep(30) 更快且更准

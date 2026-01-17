@@ -20,6 +20,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg wget gnupg2
+          # GitHub Runner 自带 Chrome，但为了保险通常安装 FFmpeg 即可
+          ffmpeg -version
       # 3. 安装依赖
       - name: Install dependencies
         run: |
